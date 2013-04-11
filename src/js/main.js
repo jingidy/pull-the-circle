@@ -5,13 +5,17 @@ $(function () {
 
   var circle = $('#circle');
   var diameter = circle.width();
+  var radius = diameter / 2;
   var originX = null;
   var originY = null;
   var originNeedsUpdate = true;
 
-  var lastUpdateRadian = null;
+  var maxDist = 500;
+  var lastUpdatedX = null;
+  var lastUpdatedY = null;
+  var lastUpdatedDist = null;
 
-  var maxHeightRatio = 1;
+  var maxHeightRatio = 2;
   var minHeightRatio = 0.1;
 
   // Functions
@@ -28,6 +32,12 @@ $(function () {
     return angle;
   }
 
+  function distance(x1, y1, x2, y2) {
+    var x = x1 - x2;
+    var y = y1 - y2;
+    return Math.sqrt(x * x + y * y);
+  }
+
   function radian2tickNum(rad) {
     var ratio = rad/(2*Math.PI);
     var tickNum = (ratio * tickCount).toFixed(1);
@@ -41,8 +51,14 @@ $(function () {
     var distToLongest = Math.abs(index - longestTickNum);
     var minDistToLongest = Math.min(distToLongest, tickCount - distToLongest);
     var ratioFromLongest = minDistToLongest / halfCount;
-    var scale = (1 - ratioFromLongest) * (maxHeightRatio - minHeightRatio) + minHeightRatio;
-    ticks[index].css('-webkit-transform', 'scaleX(' + scale + ')');
+    var amountToDistort = 1 - ratioFromLongest;
+
+    var scale;
+    if (lastUpdatedDist > radius)
+      scale = 1 + amountToDistort * maxHeightRatio * (lastUpdatedDist - radius) / (500 - radius);
+    else
+      scale = Math.max(minHeightRatio, 1 - amountToDistort * (radius - lastUpdatedDist)/radius);
+    ticks[index].css('-webkit-transform', 'translateX(' + scale * 50 + 'px) scaleX(' + scale + ')');
   }
 
   function updateOrigin() {
@@ -56,21 +72,23 @@ $(function () {
     var x = e.pageX;
     var y = e.pageY;
 
+    // Bail if not diff enough
+    if (Math.abs(x - lastUpdatedX) < 5 && Math.abs(y - lastUpdatedY) < 5)
+      return;
+    lastUpdatedX = x;
+    lastUpdatedY = y;
+
     // Re-base to be offset from circle's origin
     if (originNeedsUpdate)
       updateOrigin();
     x = x - originX;
     y = y - originY;
 
-    // Find the current angle, and bail if it's not different enough
-    var rad = cartesian2radian(x, y);
-    if (lastUpdateRadian && Math.abs(rad - lastUpdateRadian) < 0.1)
-      return;
-
-    lastUpdateRadian = rad;
+    // Bigger dist = longer ticks
+    lastUpdatedDist = Math.min(distance(x, y, 0, 0), maxDist);
 
     // Find the longest tick
-    var longest = radian2tickNum(rad);
+    var longest = radian2tickNum(cartesian2radian(x, y));
     for (var i = 0; i < tickCount; i++)
       updateTickHeight(i, longest);
   }
