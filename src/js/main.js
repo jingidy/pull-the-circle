@@ -9,6 +9,8 @@ $(function () {
   var originY = null;
   var originNeedsUpdate = true;
 
+  var lastUpdateRadian = null;
+
   var maxHeightRatio = 1;
   var minHeightRatio = 0.1;
 
@@ -61,8 +63,16 @@ $(function () {
     x = x - originX;
     y = y - originY;
 
+    // Find the current angle, and bail if it's not different enough
+    var rad = cartesian2radian(x, y);
+    if (lastUpdateRadian && Math.abs(rad - lastUpdateRadian) < 0.1)
+      return;
+
+    lastUpdateRadian = rad;
+    console.log(lastUpdateRadian);
+
     // Find the longest tick
-    var longest = radian2tickNum(cartesian2radian(x, y));
+    var longest = radian2tickNum(rad);
     for (var i = 0; i < tickCount; i++)
       updateTickHeight(i, longest);
   }
@@ -83,7 +93,7 @@ $(function () {
     }
 
     // Add event listeners
-    $('body').on('click', updateTicks);
+    $('body').on('mousemove', updateTicks);
     $(window).resize(function () {
       originNeedsUpdate = true;
     });
