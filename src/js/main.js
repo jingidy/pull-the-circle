@@ -5,6 +5,9 @@ $(function () {
 
   var circle = $('#circle');
   var diameter = circle.width();
+  var originX = null;
+  var originY = null;
+  var originNeedsUpdate = true;
 
   var maxHeightRatio = 1;
   var minHeightRatio = 0.1;
@@ -40,14 +43,21 @@ $(function () {
     ticks[index].css('-webkit-transform', 'scaleX(' + scale + ')');
   }
 
+  function updateOrigin() {
+    var offset = circle.offset();
+    originX = offset.left + diameter/2;
+    originY = offset.top + diameter/2;
+    originNeedsUpdate = false;
+    console.log(originX + ' ' + originY)
+  }
+
   function updateTicks (e) {
     var x = e.pageX;
     var y = e.pageY;
 
     // Re-base to be offset from circle's origin
-    var offset = circle.offset();
-    var originX = offset.left + diameter/2;
-    var originY = offset.top + diameter/2;
+    if (originNeedsUpdate)
+      updateOrigin();
     x = x - originX;
     y = y - originY;
 
@@ -74,6 +84,9 @@ $(function () {
 
     // Add event listeners
     $('body').on('click', updateTicks);
+    $(window).resize(function () {
+      originNeedsUpdate = true;
+    });
   }
 
   init();
