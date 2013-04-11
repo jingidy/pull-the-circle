@@ -84,6 +84,8 @@ $(function () {
       container.css('-webkit-transform', 'rotate(' + angle + 'deg)');
 
       var tick = $('<div>').addClass('tick');
+      var color = 'hsl(' + (Math.random() * 256).toFixed(0) + ', 50%, ' + (Math.random() * 50 + 30).toFixed(0) + '%)';
+      tick.css('background-color', color);
       ticks[i] = tick;
       container.append(tick);
 
