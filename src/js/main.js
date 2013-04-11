@@ -1,7 +1,7 @@
 $(function () {
   // Globals
   var ticks = [];
-  var tickCount = 4;
+  var tickCount = 100;
 
   var circle = $('#circle');
   var diameter = circle.width();
