@@ -50,7 +50,6 @@ $(function () {
     originX = offset.left + diameter/2;
     originY = offset.top + diameter/2;
     originNeedsUpdate = false;
-    console.log(originX + ' ' + originY)
   }
 
   function updateTicks (e) {
@@ -69,7 +68,6 @@ $(function () {
       return;
 
     lastUpdateRadian = rad;
-    console.log(lastUpdateRadian);
 
     // Find the longest tick
     var longest = radian2tickNum(rad);
